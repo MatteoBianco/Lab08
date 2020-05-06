@@ -7,6 +7,11 @@ package it.polito.tdp.extflightdelays;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultWeightedEdge;
+
+import it.polito.tdp.extflightdelays.model.Airport;
+import it.polito.tdp.extflightdelays.model.AirportPair;
 import it.polito.tdp.extflightdelays.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,7 +40,27 @@ public class FXMLController {
 
     @FXML
     void doAnalizzaAeroporti(ActionEvent event) {
-    	//TODO
+    	txtResult.clear();
+    	String input = distanzaMinima.getText();
+    	Integer distanzaMinima = 0;
+    	try {
+    		distanzaMinima = Integer.parseInt(input);
+    	} catch (NumberFormatException e) {
+    		txtResult.setText("Errore: inserire il numero di miglia che rappresenti la distanza minima"
+    				+ " tra due aeroporti\n ");
+    		return;
+    	}
+    	if(distanzaMinima < 0) {
+    		txtResult.setText("Valore errato: impossibile accettare valori in miglia minori di zero\n");
+    		return;
+    	}
+    	Graph<Airport, DefaultWeightedEdge> output = this.model.creaGrafo(distanzaMinima);
+    	txtResult.appendText("Il numero di aeroporti presenti nel database (vertici del grafo) è " + output.vertexSet().size() + "\n");
+    	txtResult.appendText("Il numero di connessioni disponibili tra aeroporti (archi del grafo) che distano almeno " + distanzaMinima + " miglia è " + output.edgeSet().size() + "\n");
+    	for(DefaultWeightedEdge e : output.edgeSet()) {
+    		AirportPair ap = new AirportPair(output.getEdgeSource(e), output.getEdgeTarget(e), output.getEdgeWeight(e));
+    		txtResult.appendText(ap.toString() + "\n");
+    	}
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
