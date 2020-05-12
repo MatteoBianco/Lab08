@@ -94,4 +94,31 @@ public class ExtFlightDelaysDAO {
 			throw new RuntimeException("Error Connection Database");
 		}
 	}
+	
+	public List<AirportPair> loadPairs(Map<Integer, Airport> idMapAirports) {
+		
+		List<AirportPair> coppie = new LinkedList<>();
+		String sql = "SELECT DISTINCT ORIGIN_AIRPORT_ID, DESTINATION_AIRPORT_ID, AVG(DISTANCE) AS distance "
+				+ "FROM flights GROUP BY ORIGIN_AIRPORT_ID, DESTINATION_AIRPORT_ID";
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				AirportPair ap = new AirportPair(idMapAirports.get(rs.getInt("ORIGIN_AIRPORT_ID")), 
+						idMapAirports.get(rs.getInt("DESTINATION_AIRPORT_ID")), rs.getDouble("distance"));
+				coppie.add(ap);
+			}
+
+			conn.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+		
+		return coppie;
+	}
 }

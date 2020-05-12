@@ -33,20 +33,16 @@ public class Model {
 		
 		grafo = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 		Graphs.addAllVertices(this.grafo, idMapAirports.values());	
-		for(Flight f : idMapFlights.values()) {
-			if (grafo.getEdge(idMapAirports.get(f.getOriginAirportId()), 
-					idMapAirports.get(f.getDestinationAirportId())) == null) {
+		for(AirportPair ap : dao.loadPairs(idMapAirports)) {
+			DefaultWeightedEdge e = grafo.getEdge(ap.getOrigin(), ap.getDestination());
+			if (e == null) {
 				
-				Graphs.addEdge(grafo, idMapAirports.get(f.getOriginAirportId()), 
-						idMapAirports.get(f.getDestinationAirportId()), f.getDistance());
+				Graphs.addEdge(grafo, ap.getOrigin(), 
+						ap.getDestination(), ap.getDistance());
 			}
 			else {
-				double avg = this.avg(f.getDistance(), grafo.getEdgeWeight(grafo.getEdge(idMapAirports.get(f.getOriginAirportId()), 
-								idMapAirports.get(f.getDestinationAirportId()))));
-				grafo.removeEdge(grafo.getEdge(idMapAirports.get(f.getOriginAirportId()), 
-						idMapAirports.get(f.getDestinationAirportId())));
-				Graphs.addEdge(grafo, idMapAirports.get(f.getOriginAirportId()), 
-						idMapAirports.get(f.getDestinationAirportId()), avg);
+				double avg = this.avg(ap.getDistance(), grafo.getEdgeWeight(e));
+				this.grafo.setEdgeWeight(e, avg);
 			}
 		}
 		Set<DefaultWeightedEdge> daRimuovere = new HashSet<>();
